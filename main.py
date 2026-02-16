@@ -1,25 +1,17 @@
 from fastapi import FastAPI 
+from app.routes.issues import router as issues_router
+from app.middleware.timer import timing_middleware
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 
-items = [
-    {"id": 1, "AI": "Item 1"},
-    {"id": 2, "SDK": "Item 2"},
-    {"id": 3, "IDE": "Item 3"},
-    {"id": 4, "API": "Item 4"},
-    {"id": 5, "AGENT": "Item 5"},
-]
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-    
-@app.get("/items")
-def get_items():
-    return items
-
-@app.get("/items/{item_id}")
-def get_item(item_id: int):
-    for item in items:
-        if item["id"] == item_id:
-            return item
-    return {"error": "Item not found"}
+app.middleware("http")(timing_middleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+app.include_router(issues_router)
